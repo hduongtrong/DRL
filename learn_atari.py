@@ -13,7 +13,7 @@ class AtariRamLinearValueFunction(ValueFunction):
     coeffs = None
     def _features(self, path):
         o = path["observations"].astype('float64')/256.0 - .5
-        ipdb.set_trace()
+        #ipdb.set_trace()
         l = pathlength(path)
         al = np.arange(l).reshape(-1,1) / 50.0
         return np.concatenate([o, al, al**2, np.ones((l,1))], axis=1)
