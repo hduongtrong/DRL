@@ -6,23 +6,40 @@ from tabulate import tabulate
 from prepare_h5_file import prepare_h5_file
 import argparse
 from atari_ram_policy import AtariRAMPolicy
-
-
+import ipdb
+from sklearn.ensemble import RandomForestRegressor
 
 class AtariRamLinearValueFunction(ValueFunction):
     coeffs = None
     def _features(self, path):
-        o = path["observations"].astype('float64')/256.0 - 128.0
+        o = path["observations"].astype('float64')/256.0 - .5
+        ipdb.set_trace()
         l = pathlength(path)
         al = np.arange(l).reshape(-1,1) / 50.0
         return np.concatenate([o, al, al**2, np.ones((l,1))], axis=1)
     def fit(self, paths):
         featmat = np.concatenate([self._features(path) for path in paths])
         returns = np.concatenate([path["returns"] for path in paths])
+        # ipdb.set_trace()
         self.coeffs = np.linalg.lstsq(featmat, returns)[0]
     def predict(self, path):
         return np.zeros(pathlength(path)) if self.coeffs is None else self._features(path).dot(self.coeffs)
 
+class AtariRamForestValueFunction(ValueFunction):
+    coeffs = None
+    def _features(self, path):
+        o = path["observations"].astype('float64')/256.0 - .5
+        l = pathlength(path)
+        al = np.arange(l).reshape(-1,1) / 50.0
+        return np.concatenate([o, al, al**2, np.ones((l,1))], axis=1)
+    def fit(self, paths):
+        featmat = np.concatenate([self._features(path) for path in paths])
+        returns = np.concatenate([path["returns"] for path in paths])
+        self.clf = RandomForestRegressor(n_estimators = 100)
+        self.clf.fit(featmat, returns)
+    def predict(self, path):
+        return np.zeros(pathlength(path)) if self.coeffs is None else \
+                self.clf.predict(self._features(path))
 
 def main():
 
@@ -50,7 +67,7 @@ def main():
     mdp = AtariMDP('atari_roms/%s.bin'%args.game)
     policy = AtariRAMPolicy(mdp.n_actions)
     vf = AtariRamLinearValueFunction()
-
+    # vf = AtariRamForestValueFunction()
 
     hdf, diagnostics = prepare_h5_file(args, {"policy" : policy, "mdp" : mdp})
 
