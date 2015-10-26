@@ -154,6 +154,9 @@ def main():
         plt.figure()
         plt.title("Reward wrt Running Time")
         plt.plot(diagnostics['TimeElapsed'], EpRewMean)
+        plt.savefig('./Output/%s %s KL Old New.pdf' %(vf.__class__.__name__,
+                                                       args.game ))
+
 
 if __name__ == "__main__":
     main()
