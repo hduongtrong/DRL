@@ -34,7 +34,7 @@ class FrozenLake(MDP):
     """
 
     def __init__(self, desc):
-        self.desc = np.asarray(desc,dtype='c1')
+        self.desc = np.asarray(desc,dtype='c')
         self.nrow, self.ncol = nrow, ncol = self.desc.shape
         self.maxxy = np.array([nrow-1, ncol-1])
         (startx,), (starty,) = np.nonzero(self.desc=='S')
