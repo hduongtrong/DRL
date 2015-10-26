@@ -1,4 +1,7 @@
+mjpy/.rvmrc
 data
+*.swp
+cv.py
 vendor/
 *.so
 *.pyc

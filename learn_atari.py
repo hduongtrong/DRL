@@ -124,6 +124,36 @@ def main():
 
         grp = hdf.create_group("snapshots/%.4i"%(iteration))
         policy.pc.to_h5(grp)
+        
+        plt.figure()
+        plt.title("Episode Reward")
+        EpRewMean = np.array(diagnostics["EpRewMean"])
+        EpRewStd = np.array(diagnostics["EpRewSEM"])
+        plt.errorbar(np.arange(len(EpRewMean)), EpRewMean, yerr=EpRewStd, 
+                     errorevery=5, linewidth=1)
+        plt.savefig('./Output/%s %s Episode Reward.pdf' %(vf.__class__.__name__,
+                                                       args.game ))
+        plt.figure()
+        plt.title("Mean Episode Length")
+        plt.plot(diagnostics["EpLenMean"])
+        plt.savefig('./Output/%s %s Mean Episode Length.pdf' %(
+                        vf.__class__.__name__, args.game ))
+
+        plt.figure()
+        plt.title("Perplexity")
+        plt.plot(diagnostics["Perplexity"])
+        plt.savefig('./Output/%s %s Perplexity.pdf' %(vf.__class__.__name__,
+                                                       args.game ))
+
+        plt.figure()
+        plt.title("Mean KL Divergence Between Old & New Policies")
+        plt.plot(diagnostics["KLOldNew"]);
+        plt.savefig('./Output/%s %s KL Old New.pdf' %(vf.__class__.__name__,
+                                                       args.game ))
+        
+        plt.figure()
+        plt.title("Reward wrt Running Time")
+        plt.plot(diagnostics['TimeElapsed'], EpRewMean)
 
 if __name__ == "__main__":
     main()
