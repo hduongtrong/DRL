@@ -81,13 +81,13 @@ def main():
     parser.add_argument("--game",type=str,choices=["pong","breakout","enduro","beam_rider","space_invaders","seaquest","qbert"],default='pong')
 
     # Parameters
-    parser.add_argument("--n_iter",type=int,default=1000)
-    parser.add_argument("--gamma",type=float,default=.98)
+    parser.add_argument("--n_iter",type=int,default=500)
+    parser.add_argument("--gamma",type=float,default=.99)
     parser.add_argument("--lam",type=float,default=1.00)
-    parser.add_argument("--timesteps_per_batch",type=int,default=30000)
+    parser.add_argument("--timesteps_per_batch",type=int,default=100000)
     parser.add_argument("--penalty_coeff",type=float,default=0.5)
     parser.add_argument("--max_pathlength",type=int,default=10000)
-    parser.add_argument("--max_kl",type=float,default=.04)
+    parser.add_argument("--max_kl",type=float,default=.01)
 
     args = parser.parse_args()
 
@@ -95,8 +95,8 @@ def main():
 
     mdp = AtariMDP('atari_roms/%s.bin'%args.game)
     policy = AtariRAMPolicy(mdp.n_actions)
-    vf = AtariRamLinearValueFunction()
-    # vf = AtariRamForestValueFunction()
+    # vf = AtariRamLinearValueFunction()
+    vf = AtariRamForestValueFunction()
     # vf = AtariRamNeuralValueFunction()
 
     hdf, diagnostics = prepare_h5_file(args, {"policy" : policy, "mdp" : mdp})
@@ -154,7 +154,7 @@ def main():
         plt.figure()
         plt.title("Reward wrt Running Time")
         plt.plot(diagnostics['TimeElapsed'], EpRewMean)
-        plt.savefig('./Output/%s %s KL Old New.pdf' %(vf.__class__.__name__,
+        plt.savefig('./Output/%s %s Reward vs RunTime.pdf' %(vf.__class__.__name__,
                                                        args.game ))
 
 
