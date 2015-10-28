@@ -74,9 +74,11 @@ def run_ppo(mdp, policy,
     max_pathlength : maximum episode length (number of timesteps)
     n_iter : number of batches of PPO
     vf : instance of ValueFunction
-    lam : lambda parameter of lambda for computing advantage estimator adv_t = delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots
+    lam : lambda parameter of lambda for computing advantage estimator 
+    adv_t = delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots
            as described in http://arxiv.org/abs/1506.05254
-    penalty_coeff : each iteration we solve the unconstrained minimization problem minimize_{theta} L(theta) + penalty_coeff * KL( thetaold, theta )
+    penalty_coeff : each iteration we solve the unconstrained minimization 
+    problem minimize_{theta} L(theta) + penalty_coeff * KL( thetaold, theta )
     parallel : use python's multiprocessing to parallelize the rollouts
     max_kl : hard limit on KL divergence between old and new policy for one iteration of PPO
     """
@@ -185,6 +187,7 @@ def run_ppo(mdp, policy,
                 thprev = policy.get_parameters_flat()
                 policy.set_parameters_flat(th)
                 surr, kl = policy.compute_surr_kl(*poar_train) #pylint: disable=W0640
+                penalty_coef = penalty_coef * 1.01 # New
                 out = penalty_coeff * kl - surr
                 if kl > max_kl or not np.isfinite(out): 
                     out = 1e10
@@ -200,7 +203,8 @@ def run_ppo(mdp, policy,
                 policy.set_parameters_flat(thprev)
                 return out                
 
-            theta,_,info = scipy.optimize.fmin_l_bfgs_b(fpen, theta, fprime=fgradpen, maxiter=20)
+            theta,_,info = scipy.optimize.fmin_l_bfgs_b(fpen, theta, 
+                    fprime=fgradpen, maxiter=10)
             del info["grad"]
             print info
 
