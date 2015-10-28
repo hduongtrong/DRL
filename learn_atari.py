@@ -10,6 +10,7 @@ import ipdb
 from sklearn.ensemble import RandomForestRegressor
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
+import matplotlib.pyplot as plt
 
 class AtariRamLinearValueFunction(ValueFunction):
     coeffs = None
@@ -59,11 +60,14 @@ class AtariRamNeuralValueFunction(ValueFunction):
                         init="glorot_uniform"))
         model.add(Activation("relu"))
         model.add(Dropout(0.2))
+        model.add(Dense(output_dim = 256, init = "glorot_uniform"))
+        model.add(Activation("relu"))
+        model.add(Dropout(0.2))
         model.add(Dense(output_dim = 1, init="glorot_uniform"))
         model.add(Activation("linear"))
 
         model.compile(loss='mean_squared_error', optimizer='adagrad')
-        model.fit(featmat, returns, batch_size=32, nb_epoch=5)
+        model.fit(featmat, returns, batch_size=128, nb_epoch=5)
         self.clf = model
 
     def predict(self, path):
@@ -96,8 +100,8 @@ def main():
     mdp = AtariMDP('atari_roms/%s.bin'%args.game)
     policy = AtariRAMPolicy(mdp.n_actions)
     # vf = AtariRamLinearValueFunction()
-    vf = AtariRamForestValueFunction()
-    # vf = AtariRamNeuralValueFunction()
+    # vf = AtariRamForestValueFunction()
+    vf = AtariRamNeuralValueFunction()
 
     hdf, diagnostics = prepare_h5_file(args, {"policy" : policy, "mdp" : mdp})
 
@@ -125,37 +129,38 @@ def main():
         grp = hdf.create_group("snapshots/%.4i"%(iteration))
         policy.pc.to_h5(grp)
         
-        plt.figure()
-        plt.title("Episode Reward")
-        EpRewMean = np.array(diagnostics["EpRewMean"])
-        EpRewStd = np.array(diagnostics["EpRewSEM"])
-        plt.errorbar(np.arange(len(EpRewMean)), EpRewMean, yerr=EpRewStd, 
-                     errorevery=5, linewidth=1)
-        plt.savefig('./Output/%s %s Episode Reward.pdf' %(vf.__class__.__name__,
-                                                       args.game ))
-        plt.figure()
-        plt.title("Mean Episode Length")
-        plt.plot(diagnostics["EpLenMean"])
-        plt.savefig('./Output/%s %s Mean Episode Length.pdf' %(
-                        vf.__class__.__name__, args.game ))
+        if False:
+            plt.figure()
+            plt.title("Episode Reward")
+            EpRewMean = np.array(diagnostics["EpRewMean"])
+            EpRewStd = np.array(diagnostics["EpRewSEM"])
+            plt.errorbar(np.arange(len(EpRewMean)), EpRewMean, yerr=EpRewStd, 
+                         errorevery=5, linewidth=1)
+            plt.savefig('./Output/%s %s Episode Reward.pdf' %(vf.__class__.__name__,
+                                                           args.game ))
+            plt.figure()
+            plt.title("Mean Episode Length")
+            plt.plot(diagnostics["EpLenMean"])
+            plt.savefig('./Output/%s %s Mean Episode Length.pdf' %(
+                            vf.__class__.__name__, args.game ))
 
-        plt.figure()
-        plt.title("Perplexity")
-        plt.plot(diagnostics["Perplexity"])
-        plt.savefig('./Output/%s %s Perplexity.pdf' %(vf.__class__.__name__,
-                                                       args.game ))
+            plt.figure()
+            plt.title("Perplexity")
+            plt.plot(diagnostics["Perplexity"])
+            plt.savefig('./Output/%s %s Perplexity.pdf' %(vf.__class__.__name__,
+                                                           args.game ))
 
-        plt.figure()
-        plt.title("Mean KL Divergence Between Old & New Policies")
-        plt.plot(diagnostics["KLOldNew"]);
-        plt.savefig('./Output/%s %s KL Old New.pdf' %(vf.__class__.__name__,
-                                                       args.game ))
-        
-        plt.figure()
-        plt.title("Reward wrt Running Time")
-        plt.plot(diagnostics['TimeElapsed'], EpRewMean)
-        plt.savefig('./Output/%s %s Reward vs RunTime.pdf' %(vf.__class__.__name__,
-                                                       args.game ))
+            plt.figure()
+            plt.title("Mean KL Divergence Between Old & New Policies")
+            plt.plot(diagnostics["KLOldNew"]);
+            plt.savefig('./Output/%s %s KL Old New.pdf' %(vf.__class__.__name__,
+                                                           args.game ))
+            
+            plt.figure()
+            plt.title("Reward wrt Running Time")
+            plt.plot(diagnostics['TimeElapsed'], EpRewMean)
+            plt.savefig('./Output/%s %s Reward vs RunTime.pdf' %(vf.__class__.__name__,
+                                                           args.game ))
 
 
 if __name__ == "__main__":
