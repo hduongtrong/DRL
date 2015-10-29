@@ -60,10 +60,12 @@ class AtariRamNeuralValueFunction(ValueFunction):
                         init="glorot_uniform"))
         model.add(Activation("relu"))
         model.add(Dropout(0.2))
-        model.add(Dense(output_dim = 256, init = "glorot_uniform"))
+        model.add(Dense(output_dim = 256, input_dim = 256, 
+            init = "glorot_uniform"))
         model.add(Activation("relu"))
         model.add(Dropout(0.2))
-        model.add(Dense(output_dim = 1, init="glorot_uniform"))
+        model.add(Dense(output_dim = 1, input_dim = 256, 
+            init="glorot_uniform"))
         model.add(Activation("linear"))
 
         model.compile(loss='mean_squared_error', optimizer='adagrad')
