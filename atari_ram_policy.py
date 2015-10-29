@@ -15,12 +15,14 @@ class AtariRAMPolicy(PPOPolicy, Serializable):
         q_n = cgt.vector("q_n")
         oldpdist_np = cgt.matrix("oldpdists")
 
-        h0 = (o_no - 128.0)/128.0 
         nhid, nhid2 = 64, 64
-        h1 = nn.rectify(nn.Affine(128,nhid,weight_init=nn.IIDGaussian(std=.1))(h0))
+        h0 = (o_no - 128.0)/128.0
+        d0 = nn.dropout(h1, .2)
+
+        h1 = nn.rectify(nn.Affine(128,nhid,weight_init=nn.IIDGaussian(std=.1))(d0))
         d1 = nn.dropout(h1, .2)
         h2 = nn.rectify(nn.Affine(nhid,nhid2,weight_init=nn.IIDGaussian(std=.1))(d1))
-        d2 = nn.dropout(h2, .2)
+        # d2 = nn.dropout(h2, .2)
         probs_na = nn.softmax(nn.Affine(nhid2,n_actions,weight_init=nn.IIDGaussian(std=0.01))(d2))
         logprobs_na = cgt.log(probs_na)
         b = cgt.size(o_no, 0)
