@@ -124,7 +124,7 @@ def main():
             diagnostics[statname].append(statval)
 
         if args.plot:
-            animate_rollout(mdp,policy,delay=.001,horizon=100)
+            animate_rollout(mdp,policy,delay=.001,horizon=40000)
 
         grp = hdf.create_group("snapshots/%.4i"%(iteration))
         policy.pc.to_h5(grp)

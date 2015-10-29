@@ -187,7 +187,6 @@ def run_ppo(mdp, policy,
                 thprev = policy.get_parameters_flat()
                 policy.set_parameters_flat(th)
                 surr, kl = policy.compute_surr_kl(*poar_train) #pylint: disable=W0640
-                penalty_coef = penalty_coef * 1.01 # New
                 out = penalty_coeff * kl - surr
                 if kl > max_kl or not np.isfinite(out): 
                     out = 1e10
@@ -204,7 +203,7 @@ def run_ppo(mdp, policy,
                 return out                
 
             theta,_,info = scipy.optimize.fmin_l_bfgs_b(fpen, theta, 
-                    fprime=fgradpen, maxiter=10)
+                    fprime=fgradpen, maxiter=20)
             del info["grad"]
             print info
 
