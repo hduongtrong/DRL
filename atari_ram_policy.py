@@ -19,9 +19,9 @@ class AtariRAMPolicy(PPOPolicy, Serializable):
         nhid = 64, nhid2 = 64, 64
         h1 = nn.rectify(nn.Affine(128,nhid,weight_init=nn.IIDGaussian(std=.1))(h0))
         d1 = nn.dropout(h1, .2)
-        h2 = nn.rectify(nn.Affine(128,nhid2,weight_init=nn.IIDGaussian(std=.1))(d1))
+        h2 = nn.rectify(nn.Affine(nhid,nhid2,weight_init=nn.IIDGaussian(std=.1))(d1))
         d2 = nn.dropout(h2, .2)
-        probs_na = nn.softmax(nn.Affine(nhid,n_actions,weight_init=nn.IIDGaussian(std=0.01))(d2))
+        probs_na = nn.softmax(nn.Affine(nhid2,n_actions,weight_init=nn.IIDGaussian(std=0.01))(d2))
         logprobs_na = cgt.log(probs_na)
         b = cgt.size(o_no, 0)
         logps_n = logprobs_na[cgt.arange(b), a_n]
