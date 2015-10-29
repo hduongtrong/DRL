@@ -16,7 +16,7 @@ class AtariRAMPolicy(PPOPolicy, Serializable):
         oldpdist_np = cgt.matrix("oldpdists")
 
         h0 = (o_no - 128.0)/128.0 
-        nhid = 64, nhid2 = 64, 64
+        nhid, nhid2 = 64, 64
         h1 = nn.rectify(nn.Affine(128,nhid,weight_init=nn.IIDGaussian(std=.1))(h0))
         d1 = nn.dropout(h1, .2)
         h2 = nn.rectify(nn.Affine(nhid,nhid2,weight_init=nn.IIDGaussian(std=.1))(d1))
